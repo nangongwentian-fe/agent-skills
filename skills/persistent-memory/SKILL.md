@@ -158,6 +158,115 @@ mcporter call 'exa.get_code_context_exa(query: "上次配置的 Twitter", tokens
 0 0 * * 0 tar -czf ~/memory-backup-$(date +\%Y-\%m-\%d).tar.gz ~/.persistent-memory/
 ```
 
+## GitHub 云同步（可选）
+
+### 功能概述
+
+多设备同步记忆，私有仓库存储，支持 Git 版本控制。
+
+### 初始化
+
+用户给 GitHub Token 后：
+
+```bash
+# 1. 检查或创建私有仓库
+export GH_TOKEN="ghp_xxx"
+REPO="~/.persistent-memory"
+
+# 检查仓库是否存在，不存在则创建
+gh repo view nangongwentian-fe/persistent-memory 2>/dev/null || \
+  gh repo create persistent-memory --private --source=. --push
+
+# 2. 克隆到本地
+git clone https://ghp_xxx@github.com/nangongwentian-fe/persistent-memory.git ~/.persistent-memory
+```
+
+### 同步流程
+
+```bash
+# 每次会话结束或需要同步时：
+cd ~/.persistent-memory
+
+# 拉取远程最新
+git fetch origin
+git merge origin/main --no-edit  # 冲突时提示用户
+
+# 添加本地变更
+git add -A
+git commit -m "sync: $(date)"
+
+# 推送到远程
+git push origin main
+```
+
+### 冲突处理
+
+**策略：本地优先 + 用户决定**
+
+```bash
+# 检测冲突
+if git merge --no-commit --no-ff origin/main 2>/dev/null; then
+  # 无冲突，直接提交
+  git commit -m "sync: merge remote"
+else
+  # 有冲突，提示用户
+  echo "⚠️ 记忆冲突，请手动解决后继续"
+  git merge --abort
+fi
+```
+
+### Token 安全存储
+
+```bash
+# 方案一：环境变量（推荐）
+export PERSISTENT_MEMORY_GH_TOKEN="ghp_xxx"
+
+# 方案二：加密文件
+echo "ghp_xxx" | gpg -c > ~/.persistent-memory/.token.gpg
+
+# 不推荐：明文存储
+```
+
+### 定时同步（可选 cron）
+
+```bash
+# 每小时同步一次
+0 * * * * cd ~/.persistent-memory && \
+  git fetch origin && \
+  git stash && \
+  git pull --rebase origin main && \
+  git stash pop && \
+  git add -A -u && \
+  git commit -m "sync" && \
+  git push origin main
+```
+
+### 敏感信息不同步
+
+默认不同步 SENSITIVE.md：
+
+```bash
+# 在 .gitignore 添加
+echo "SENSITIVE.md" >> ~/.persistent-memory/.gitignore
+echo ".token.gpg" >> ~/.persistent-memory/.gitignore
+```
+
+### 增量同步（优化）
+
+只同步变更的文件：
+
+```bash
+# 获取远程最新 commit
+REMOTE_HASH=$(git rev-parse origin/main)
+
+# 找出本地和远程的差异文件
+DIFF_FILES=$(git diff --name-only $REMOTE_HASH HEAD)
+
+# 只提交差异文件
+git add $DIFF_FILES
+git commit -m "sync: incremental"
+```
+
 ## 导出/导入
 
 ### 导出所有记忆
