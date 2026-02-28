@@ -2,6 +2,7 @@
 name: persistent-memory
 description: |
   跨会话的长期记忆系统。让 AI 记住账号、配置、技术发现、项目背景等重要信息，像人一样累积经验。
+  适用对象：Claude Code、Codex、Open Code 等 AI 编程工具（它们不具备完整的记忆系统）。
   触发场景：用户说"记住"/"记录"；用户问"之前"/"上次"；获取到重要信息；会话结束；收到 flush 信号。
 ---
 
