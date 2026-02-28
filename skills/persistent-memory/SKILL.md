@@ -3,7 +3,7 @@ name: persistent-memory
 description: |
   跨会话的长期记忆系统。让 AI 记住账号、配置、技术发现、项目背景等重要信息，像人一样累积经验。
   适用对象：Claude Code、Codex、Open Code 等 AI 编程工具（它们不具备完整的记忆系统）。
-  触发场景：用户说"记住"/"记录"；用户问"之前"/"上次"；获取到重要信息；会话结束；收到 flush 信号。
+  触发场景：用户说"记住"/"记录"；用户问"之前"/"上次"；获取到重要信息；自动检测到敏感信息。
 ---
 
 # Persistent Memory
@@ -14,96 +14,50 @@ description: |
 
 ## 存储位置
 
-通用记忆文件（适用于任何 AI Agent 框架）：
+```
+~/.persistent-memory/          # 推荐目录
+~/.claude/memory/             # 兼容 Claude Code
+~/.claude/memory/LONGTERM.md  # Claude Code 长期记忆
+~/.claude/memory/daily/       # Claude Code 每日日记
+```
+
+## 文件结构
 
 ```
 ~/.persistent-memory/
-├── SOUL.md           # AI 自身身份定义（性格、说话方式）
-├── USER.md           # 用户信息（名字、时区、偏好）
-├── IDENTITY.md       # 身份标识（名字、emoji、人设）
-├── AGENTS.md         # AI 工作规范（行为准则、工具使用）
-├── MEMORY.md         # 长期记忆（精选持久信息）
-├── TOOLS.md          # 本地工具配置（SSH、相机、语音等）
-├── HEARTBEAT.md      # 心跳检查清单
-└── memory/
-    └── YYYY-MM-DD.md # 每日工作日志
+├── MEMORY.md           # 长期记忆（精选持久信息）
+├── memory/
+│   └── YYYY-MM-DD.md   # 每日工作日志
+├── SENSITIVE.md        # 敏感信息清单（可选加密）
+└── HEARTBEAT.md        # 心跳检查清单
 ```
-
-## 文件说明
-
-### SOUL.md - 核心身份
-定义 AI 的核心价值观和行为准则：
-- 真正有用而非表演式帮助
-- 可以有观点和偏好
-- 保守外部动作，勇敢内部行动
-- 记住是客人，要尊重隐私
-
-### USER.md - 用户画像
-记录用户的基本信息：
-- 名字、称呼方式
-- 语言、时区
-- 偏好、习惯
-
-### IDENTITY.md - 人设
-具体的人格化定义：
-- 名字、emoji
-- 性格、说话风格
-- 头像
-
-### AGENTS.md - 工作规范
-AI 的行为准则和工具使用指南：
-- 每会话必读文件清单
-- 记忆系统说明
-- 群聊礼仪
-- 心跳使用指南
-
-### MEMORY.md - 长期记忆
-精选的持久信息：
-- 已完成任务
-- 技术知识
-- 待办事项
-- 重要账号
-
-### TOOLS.md - 工具配置
-本地环境的具体配置：
-- 相机名称、SSH 主机
-- TTS 语音偏好
-- 设备别名
-
-### memory/YYYY-MM-DD.md - 每日日记
-每天的原始工作日志：
-- 项目进展
-- 学到的新东西
-- 遇到的问题
 
 ## 触发场景（必须激活）
 
+### 显式触发
 - 用户说"记住xxx"、"记录下来"
 - 用户问"之前怎样"、"上次那个"
-- 获取到账号、配置、技术发现、项目背景
 - 完成重要任务或重大发现
 - 会话结束有新内容
 - 收到 flush/整理记忆信号
+
+### 自动触发（重要！）
+检测到以下信息时，**主动提示用户**是否记录：
+- API key、token、账号密码（不管是否打码）
+- 项目背景、技术决策
+- 用户偏好、习惯
+- 重要联系人、联系方式
+- 配置变更、环境差异
 
 ## 工作流程
 
 ### 1. 会话开始（自动）
 
-按顺序读取：
 ```bash
-# 1. 核心身份
-cat ~/.persistent-memory/SOUL.md
-
-# 2. 用户信息
-cat ~/.persistent-memory/USER.md
-
-# 3. 身份定义
-cat ~/.persistent-memory/IDENTITY.md
-
-# 4. 长期记忆
+# 读取长期记忆
 cat ~/.persistent-memory/MEMORY.md
 
-# 5. 今日和昨日日记
+# 读取今日和昨日
 cat ~/.persistent-memory/memory/$(date +%Y-%m-%d).md 2>/dev/null
 cat ~/.persistent-memory/memory/$(date -d "yesterday" +%Y-%m-%d).md 2>/dev/null
 ```
@@ -116,11 +70,6 @@ echo "## 已完成任务" >> ~/.persistent-memory/MEMORY.md
 echo "- 2026-02-28: 安装了 Agent Reach" >> ~/.persistent-memory/MEMORY.md
 ```
 
-**用户信息 → USER.md**
-```bash
-echo "- **新信息**: 具体内容" >> ~/.persistent-memory/USER.md
-```
-
 **日常细节 → memory/YYYY-MM-DD.md**
 ```bash
 DATE=$(date +%Y-%m-%d)
@@ -128,43 +77,79 @@ echo "### 新学到" >> ~/.persistent-memory/memory/$DATE.md
 echo "- fxtwitter API 可获取推文完整内容" >> ~/.persistent-memory/memory/$DATE.md
 ```
 
-### 3. 搜索记忆
+### 3. 自动检测敏感信息
+
+检测到敏感信息时，提示用户：
+```
+⚠️ 检测到敏感信息 [API Key/Token/账号]，是否需要记录到 SENSITIVE.md？（建议只记录账号名，不记录实际密钥）
+```
+
+### 4. 搜索记忆
 
 ```bash
 grep -ri "关键词" ~/.persistent-memory/
 ls -t ~/.persistent-memory/memory/ | head -7
 ```
 
-### 4. 整理记忆（定期）
+### 5. 整理记忆（定期）
 
-- 周期性回顾近期日记
+- 周期性（每次心跳或每周）回顾近期日记
 - 将重要内容合并到 MEMORY.md
-- 删除过时信息
+- 删除 MEMORY.md 中过时信息
+
+## 敏感信息安全
+
+### 绝对不记录
+- 真实密码
+- 银行卡号
+- API 真实密钥（可记录账号名）
+- 私人隐私
+
+### 可以记录
+- 账号名/ID
+- 配置项名称
+- 技术方案
+- 项目背景
+- 网址/链接
+
+### 敏感信息检测规则
+```bash
+# 检测可能敏感的字符串
+grep -E "(sk-|ghp_|eyJh|bearer|password|secret|key)" ~/.persistent-memory/
+```
+
+## 兼容 Claude Code
+
+Claude Code 使用 `~/.claude/memory/`，可以创建软链接：
+
+```bash
+# 方案一：软链接（推荐）
+ln -s ~/.claude/memory ~/.persistent-memory
+
+# 方案二：复制
+cp -r ~/.claude/memory/* ~/.persistent-memory/
+```
 
 ## 核心原则
 
 1. **用户说"记住" = 立刻写**，不问
-2. **不同类型信息写入不同文件**
+2. **自动检测敏感信息，主动提示**
 3. **定期整理**：每周或每次心跳时合并到 MEMORY.md
-4. **安全**：不记录真实密码、银行卡等敏感信息
-5. **每会话必读**：SOUL.md + USER.md + IDENTITY.md + MEMORY.md
+4. **安全第一**：不记录真实密码、密钥
+5. **向后兼容**：支持 Claude Code 目录
 
 ## 与 AI 集成
 
-在项目的 AGENTS.md 添加：
+在项目的 AGENTS.md 或 CLAUDE.md 添加：
 
 ```markdown
-## 记忆（每会话必读）
+## 记忆
 
-1. **SOUL.md** — 我是谁（核心身份）
-2. **USER.md** — 用户是谁
-3. **IDENTITY.md** — 人设定义
-4. **MEMORY.md** — 长期记忆
-5. **memory/YYYY-MM-DD.md** — 今日日记
-
-存储位置: ~/.persistent-memory/
-
-用户说"记住"时写入对应文件。
+- 长期: ~/.persistent-memory/MEMORY.md
+- 每日: ~/.persistent-memory/memory/$(date +%Y-%m-%d).md
+- 敏感: ~/.persistent-memory/SENSITIVE.md
+- 会话开始读取，用户说"记住"时写入
+- 检测到敏感信息时主动提示用户
 ```
 
 ## 初始化
@@ -192,21 +177,18 @@ cat > ~/.persistent-memory/MEMORY.md << 'EOF'
 ## 记住的账号
 EOF
 
-cat > ~/.persistent-memory/SOUL.md << 'EOF'
-# SOUL.md - 谁是我
+cat > ~/.persistent-memory/SENSITIVE.md << 'EOF'
+# SENSITIVE.md - 敏感信息清单
 
-核心价值观和行为准则。
-EOF
+只记录账号名，不记录真实密钥。
 
-cat > ~/.persistent-memory/USER.md << 'EOF'
-# USER.md - 用户信息
+## 账号
+- **GitHub**: [账号名]
+- **API**: [服务名]-[环境]
 
-用户的基本信息。
-EOF
-
-cat > ~/.persistent-memory/IDENTITY.md << 'EOF'
-# IDENTITY.md - 身份定义
-
-名字、emoji、人设。
+## 重要提示
+- 不记录真实密码
+- 不记录真实 token
+- 只记录账号名/标识符
 EOF
 ```
