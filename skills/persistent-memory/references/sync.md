@@ -74,7 +74,12 @@ echo "ghp_xxx" | gpg -c > ~/.persistent-memory/.token.gpg
 
 ## 敏感信息不同步
 
+新版使用 `.sensitive/` 目录存储敏感信息，`.gitignore` 已在初始化时配置：
+
 ```bash
-echo "SENSITIVE.md" >> ~/.persistent-memory/.gitignore
-echo ".token.gpg" >> ~/.persistent-memory/.gitignore
+# ~/.persistent-memory/.gitignore 内容
+.sensitive/
+.token.gpg
+*.db
+.DS_Store
 ```
