@@ -23,7 +23,6 @@ npx skills add https://github.com/nangongwentian-fe/jay-skills --skill <skill-na
 | [git-rebase-workflow](#git-rebase-workflow) | 将功能分支 rebase 到目标分支，保持提交历史整洁 |
 | [lark-beautiful-docs](#lark-beautiful-docs) | 让飞书文档好看——callout、分栏、增强表格，拒绝纯文字堆砌 |
 | [lark-cli-router](#lark-cli-router) | 飞书 CLI 路由：判断用官方 larksuite/cli 还是社区 feishu-cli |
-| [persistent-memory](#persistent-memory) | 跨会话记忆协议，多 AI 工具共享同一套记忆系统 |
 | [reflect-and-remember](#reflect-and-remember) | 任务完成后自动反思，将有价值的知识写入持久记忆 |
 | [sync-global-rules](#sync-global-rules) | 同步 Awesome-GlobalRule 仓库到本地 AI 工具配置 |
 | [sync-skill-to-jay](#sync-skill-to-jay) | 创建或更新 skill 后，一键同步到 jay-skills 并发布 |
@@ -115,18 +114,6 @@ npx skills add https://github.com/nangongwentian-fe/jay-skills --skill <skill-na
 - 飞书文档导入导出、Markdown 与飞书文档互转
 - Mermaid/PlantUML 导入
 - 通用 Lark/飞书平台 API 操作
-
----
-
-## persistent-memory
-
-**描述：** 通用跨会话记忆协议，让 Claude Code / Cursor / Aider / Cline / Codex / Trae / OpenCode 共享同一套记忆系统。
-
-**触发场景：**
-- 用户说"记住"、问"之前"发生的事
-- 检测到敏感信息、会话结束
-
-**能力：** 智能分类、FSRS 衰减、月度压缩、多层检索。
 
 ---
 
