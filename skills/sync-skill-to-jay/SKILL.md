@@ -50,8 +50,12 @@ Push to `origin main`.
 
 ```bash
 rm -rf ~/.claude/skills/<skill-name>
-npx skills add https://github.com/nangongwentian-fe/jay-skills
+npx skills add https://github.com/nangongwentian-fe/jay-skills --skill <skill-name> -g -y
 ```
+
+- `--skill <skill-name>` — only installs this specific skill, not all skills in the repo
+- `-g` — installs globally (user-level, into `~/.agents/skills/` with symlinks)
+- `-y` — non-interactive, no prompts
 
 This replaces the manually created skill with the properly installed version (symlinks and other optimizations from the skills framework).
 
