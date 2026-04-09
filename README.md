@@ -20,6 +20,7 @@ npx skills add https://github.com/nangongwentian-fe/jay-skills --skill <skill-na
 | [code-review-uncommitted](#code-review-uncommitted) | 多维度 code review 未提交变更，含置信度评分 |
 | [exa-unified-research](#exa-unified-research) | 优先使用 Exa 进行高质量网络检索，替代内置 WebSearch |
 | [figma-use](#figma-use) | 调用 Figma Plugin API 前的必备 skill，含全量规则与参考文档 |
+| [git-commit](#git-commit) | 分析当前 git 改动并创建单个结构化提交 |
 | [git-rebase-workflow](#git-rebase-workflow) | 将功能分支 rebase 到目标分支，保持提交历史整洁 |
 | [lark-beautiful-docs](#lark-beautiful-docs) | 让飞书文档好看——callout、分栏、增强表格，拒绝纯文字堆砌 |
 | [lark-cli-router](#lark-cli-router) | 飞书 CLI 路由：判断用官方 larksuite/cli 还是社区 feishu-cli |
@@ -81,6 +82,21 @@ npx skills add https://github.com/nangongwentian-fe/jay-skills --skill <skill-na
 **重要：** 跳过此 skill 直接调用 `use_figma` 会导致常见且难以调试的失败，请务必在每次 `use_figma` 调用前加载。
 
 **参考文档覆盖：** gotchas、常用 pattern、Plugin API 类型定义（.d.ts）、组件/变量/文本/效果样式 pattern、Design System 集成指南。
+
+---
+
+## git-commit
+
+**描述：** 基于当前 git 工作区变更生成并创建单个提交，自动归纳结构化 commit message。
+
+**触发场景：**
+- "帮我提交代码"、"根据当前 diff 生成 commit"、"创建一次 git commit"
+- 用户提供 `git status`、`git diff HEAD`、当前分支和最近提交记录，要求 agent 直接完成提交
+
+**效果示例：**
+- 读取 staged、unstaged 和 untracked 变更，归纳单一提交主题
+- 在一次回复里完成 `git add -A` 和 `git commit`
+- 只输出工具调用，生成符合模板的中文结构化 commit message
 
 ---
 
