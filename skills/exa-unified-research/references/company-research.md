@@ -22,13 +22,14 @@ Use 2-3 query variations and merge/deduplicate results.
 Use category based on intent:
 - `company`: homepages and metadata (headcount/location/funding/revenue when available)
 - `news`: press coverage and announcements
-- `tweet`: social presence and public commentary
+- `tweet` category is NOT supported — use `news` with `includeDomains: ["x.com", "twitter.com"]` instead (see social-discussion.md)
 - `people`: LinkedIn-style public profile data
 - no category (`type: "auto"`): broader web context
 
 Recommended flow:
 - Start with `category: "company"` for discovery
-- Then use `news`/`tweet`/`people`/no-category for deeper research
+- Then use `news`/`people`/no-category for deeper research
+- For social sentiment, see `social-discussion.md` (uses `category: "news"` with domain filter — `category: "tweet"` is NOT supported)
 
 ## Category-Specific Filter Restrictions
 
