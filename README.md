@@ -27,6 +27,7 @@ npx skills add https://github.com/nangongwentian-fe/jay-skills --skill <skill-na
 | [lark-beautiful-docs](#lark-beautiful-docs) | 让飞书文档不朴素，强制使用 callout、grid、增强表格等富文本格式 |
 | [lark-cli-router](#lark-cli-router) | 在飞书官方 CLI 和社区 feishu-cli 之间做路由判断与组合调用 |
 | [reflect-and-remember](#reflect-and-remember) | 任务完成后的反思记忆，将知识写入项目或私有 memory |
+| [show-dont-tell](#show-dont-tell) | 信息可视化呈现，让 GPT 优先用表格、代码块、列表呈现结构化信息 |
 | [sync-global-rules](#sync-global-rules) | 同步 Awesome-GlobalRule 仓库到本地 AI 编程工具配置 |
 | [sync-skill-to-jay](#sync-skill-to-jay) | 创建或更新 skill 后，询问是否同步到 jay-skills 仓库并发布 |
 | [update-claude-code](#update-claude-code) | 更新 Claude Code CLI 到最新版本 |
@@ -226,6 +227,35 @@ $git-commit 创建一个 git commit：
 - Mermaid/PlantUML 导入
 - 通用 Lark/飞书平台 API 操作
 - 需要判断用官方 CLI 还是社区 CLI
+
+---
+
+## show-dont-tell
+
+**描述：** 信息可视化呈现行为准则。让 GPT 在回复中优先使用表格、代码块、编号列表、树形结构等格式呈现结构化信息，而不是纯文字堆砌。与 de-gpt-ify 互补：de-gpt-ify 解决"怎么说话"，show-dont-tell 解决"怎么呈现"。
+
+**触发场景：**
+
+- 回复中包含对比、步骤、配置、架构等结构化信息时自动生效
+- 用户说"用表格""列个表""结构化一下""可视化""更直观一点"
+
+**安装后额外步骤：**
+
+```bash
+~/.agents/skills/show-dont-tell/scripts/install.sh
+```
+
+**效果示范：**
+
+❌ 纯文字：Redis 支持多种数据结构包括字符串、列表、哈希、集合和有序集合，而 Memcached 只支持简单的键值对。Redis 支持数据持久化...
+
+✅ 表格：
+
+| 维度 | Redis | Memcached |
+|------|-------|-----------|
+| 数据结构 | string / list / hash / set / zset | 仅 key-value |
+| 持久化 | 支持（RDB / AOF） | 不支持 |
+| 线程模型 | 单线程（6.0 起 IO 多线程） | 多线程 |
 
 ---
 
