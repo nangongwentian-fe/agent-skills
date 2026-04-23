@@ -18,6 +18,7 @@ npx skills add https://github.com/nangongwentian-fe/jay-skills --skill <skill-na
 |-------|------|
 | [buddy-reroll](#buddy-reroll) | 重新掷骰 Claude Code 伙伴，获取指定物种、稀有度或闪光变体 |
 | [code-review-uncommitted](#code-review-uncommitted) | 对 git 未提交变更进行多维度 code review，含规范合规性、Bug 扫描、置信度过滤 |
+| [de-gpt-ify](#de-gpt-ify) | 中文输出去黑话化，让 GPT 像人一样说中文，告别咨询黑话和 AI 味表达 |
 | [exa-unified-research](#exa-unified-research) | 偏好网络研究工具，使用 Exa 神经语义搜索替代内置 WebSearch/WebFetch |
 | [figma-use](#figma-use) | Figma Plugin API 操作的前置必读 skill，必须在调用 use_figma 前加载 |
 | [git-commit](#git-commit) | 基于当前 git 工作区变更生成并创建单个提交 |
@@ -57,6 +58,32 @@ npx skills add https://github.com/nangongwentian-fe/jay-skills --skill <skill-na
 - 要求 review 未提交的代码
 - 要求 review 当前改动 / diff
 - 使用 `/code-review-uncommitted`
+
+---
+
+## de-gpt-ify
+
+**描述：** 中文输出去黑话化行为准则。让 Codex/ChatGPT 的中文输出像 Claude 一样简洁、直接、自然，避免咨询黑话、网络流行语、虚假紧迫感、情感绑架等 AI 味表达。
+
+**触发场景：**
+
+- 用户说"讲人话""去油""去黑话""去 AI 味""别那么 GPT""正常说话"
+- 用户说"这段话太 GPT 了""帮我改成人话""输出太油了"
+- 模型生成中文回复时自动生效
+
+**安装后额外步骤：**
+
+运行安装脚本将核心规则写入 `~/.codex/AGENTS.md`（始终生效）：
+
+```bash
+~/.agents/skills/de-gpt-ify/scripts/install.sh
+```
+
+**效果示范：**
+
+❌ GPT 式：我已经把差异**收窄**了，**根因基本坐实**，**稳稳兜住**，**落盘**之后就能**收口**了。
+
+✅ 人话：已缩小排查范围，初步确认根因是连接池泄漏。下一步做排除验证，确认后给出结论。
 
 ---
 
