@@ -15,10 +15,20 @@ If yes, execute the following workflow.
 
 ### 1. Locate or clone jay-skills repo
 
-Search common local paths for the jay-skills repo:
+If the user already provided a `jay-skills` path, use it after verifying the
+directory and Git remote. Otherwise search common local paths.
+
+macOS / Linux:
 
 ```bash
 find ~ -maxdepth 5 -type d -name "jay-skills" 2>/dev/null | head -1
+```
+
+Windows PowerShell:
+
+```powershell
+Get-ChildItem -Path $env:USERPROFILE -Directory -Filter jay-skills -Recurse -ErrorAction SilentlyContinue |
+  Select-Object -First 1
 ```
 
 - If found → use that path as `JAY_SKILLS_DIR`
@@ -30,11 +40,40 @@ find ~ -maxdepth 5 -type d -name "jay-skills" 2>/dev/null | head -1
 
 ### 2. Sync skill files
 
-```bash
-cp -r ~/.claude/skills/<skill-name> $JAY_SKILLS_DIR/skills/
-```
+Resolve the source in this order:
+
+1. An explicit skill path supplied by the user
+2. `~/.agents/skills/<skill-name>` (universal/Codex installation)
+3. `~/.claude/skills/<skill-name>` (Claude Code installation or link)
+
+Keep these roles separate:
+
+- `SOURCE_SKILL_PATH`: the authoritative content to publish. An explicit
+  project/repository source is never moved. A discovered user-install source
+  may later be replaced only after the repository target is fully validated.
+- `TARGET_REPO_SKILL_PATH`: the exact `$JAY_SKILLS_DIR/skills/<skill-name>`
+  destination.
+- `CURRENT_INSTALL_PATHS`: existing `.agents` and `.claude` installation
+  entries that form the current topology and may later be replaced.
+
+Verify that the source contains `SKILL.md` and that the target remains inside
+`$JAY_SKILLS_DIR/skills/`. If source and target resolve to the same path, skip
+the copy.
+
+Never copy the source directory onto an existing target directory: both
+`cp -R SOURCE TARGET` and `Copy-Item SOURCE TARGET -Recurse` can create a
+nested `<skill-name>/<skill-name>` directory. Instead:
+
+1. Copy the source contents into a uniquely named staging directory.
+2. Validate the staged `SKILL.md` and complete file set.
+3. Move an existing exact target to a temporary backup.
+4. Move staging to the exact target.
+5. On failure, restore the target backup.
+6. After success, move the target backup to Trash/Recycle Bin.
 
 Works for both new and existing skills.
+See [references/platform-commands.md](references/platform-commands.md) for the
+cross-platform state machine and safe command primitives.
 
 ### 3. Update jay-skills README
 
@@ -106,8 +145,30 @@ Push to `origin main`.
 
 ### 6. Remove local skill and reinstall via npx
 
+Replace the bare local installation through a recoverable swap:
+
+1. Resolve `CURRENT_INSTALL_PATHS` separately from `SOURCE_SKILL_PATH`:
+   - inventory both `~/.agents/skills/<skill-name>` and
+     `~/.claude/skills/<skill-name>` before moving either one;
+   - preserve whether each entry is a real directory or link/junction;
+   - never treat an explicit project or repository source as disposable;
+   - if the discovered source is itself a user installation, first validate
+     the synchronized repository target, then handle that installation through
+     the recoverable replacement transaction.
+2. Move only the verified current installation entries to separate uniquely
+   named temporary backups outside the managed skill paths. Move agent-specific
+   links before their managed target so they do not become broken mid-check.
+3. Run the install command below.
+4. Verify the new managed `.agents` `SKILL.md`, full file set/content against
+   `TARGET_REPO_SKILL_PATH`, and Claude Code/Codex link topology.
+5. Treat installation and all verification as one transaction. If any step
+   fails, move partial new installations aside and restore every backup to its
+   original exact path and topology.
+6. After success, move regular-directory backups to Trash/Recycle Bin. Remove
+   link/junction backups only with a verified link-only operation; otherwise
+   retain the inactive backup and report its exact path.
+
 ```bash
-rm -rf ~/.claude/skills/<skill-name>
 npx skills add https://github.com/nangongwentian-fe/jay-skills --skill <skill-name> -g -y -a claude-code codex
 ```
 
@@ -117,9 +178,13 @@ npx skills add https://github.com/nangongwentian-fe/jay-skills --skill <skill-na
 - `-a claude-code codex` — only installs to Claude Code and Codex agents
 
 This replaces the manually created skill with the properly installed version (symlinks and other optimizations from the skills framework).
+See [references/platform-commands.md](references/platform-commands.md) for
+recoverable macOS/Linux and Windows command examples.
 
 ## Notes
 
 - Only sync skills the user explicitly wants published (some may be private)
 - Subdirectories (`scripts/`, `references/`, `assets/`) are included automatically via `cp -r`
 - The `npx skills add` step ensures the installed skill is managed by the skills framework, not a bare copy
+- Treat line-ending-only differences (`CRLF` versus `LF`) as equivalent when
+  comparing a Windows Git worktree with the installed GitHub copy.
