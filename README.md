@@ -55,6 +55,7 @@ codex plugin add langchain-skills@jay-skills
 | [git-topic-commit-push](#git-topic-commit-push) | 按主题拆分 Git 改动，默认使用中文 commit message 创建一个或多个 commit 并推送当前分支 |
 | [llm-wiki](#llm-wiki) | 查询和操作本地 LLM Wiki，支持 API、MCP 与固定项目文件回退 |
 | [progressive-disclosure-docs](#progressive-disclosure-docs) | 用渐进式披露设计、拆分和维护文档，避免 README 或单个文档无限膨胀 |
+| [post-implementation-review-gate](#post-implementation-review-gate) | 非平凡实现交付前执行风险分级、独立审查、发现复核与残余风险报告 |
 | [post-task-learning-review](#post-task-learning-review) | 任务完成后直接维护经验，自动新增、更新、合并或删除项目文档、memory 或 skill |
 | [search-jay-llm-wiki](#search-jay-llm-wiki) | 在相关非平凡任务前主动检索 jay-llm-wiki 中的既有研究与工程经验 |
 | [show-dont-tell](#show-dont-tell) | 信息可视化呈现，让 GPT 优先用表格、代码块、列表呈现结构化信息 |
@@ -188,6 +189,20 @@ codex plugin add langchain-skills@jay-skills
 - 判断内容应该放进已有文档还是新建专题文档
 - 为项目文档、规则文档、skill 文档设计层级和入口
 - 发现文档越来越大、主题混杂，需要拆分或重组
+
+---
+
+## post-implementation-review-gate
+
+**描述：** Use after completing a non-trivial implementation and before final handoff, especially for public API/schema compatibility, database or migration work, authentication/security, deployment/configuration, concurrency or data integrity, algorithmic or control-flow complexity, cross-module refactors, runtime lifecycle, and rendered UI behavior. Make sure to invoke this skill even when the user asks only to implement or fix something and does not explicitly request review. Risk-classify the completed change, use a new isolated read-only subagent for review-triggering changes when delegation is allowed, otherwise perform and disclose a local fallback, verify findings, fix authorized in-scope defects, rerun relevant checks, and report residual risks. Do not use for planning, answer-only or diagnosis-only tasks, trivial text edits, mechanical formatting, or tasks with no implementation-artifact change.
+
+**触发场景：**
+
+- 非平凡实现完成、准备最终交付
+- 公开 API、Schema、数据库迁移、认证安全或部署配置变更
+- 并发、数据完整性、复杂算法、控制流或跨模块重构
+- 运行时生命周期或实际 UI 行为变更
+- 用户只要求实现或修复，但没有显式要求代码审查
 
 ---
 

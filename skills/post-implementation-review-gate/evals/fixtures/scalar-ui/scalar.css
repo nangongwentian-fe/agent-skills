@@ -1,0 +1,12 @@
+body {
+  margin: 0;
+  background: white;
+}
+
+body.api-docs-body {
+  overflow: auto;
+}
+
+[data-api-docs] {
+  min-height: 200vh;
+}
