@@ -59,6 +59,7 @@ codex plugin add langchain-skills@jay-skills
 | [post-task-learning-review](#post-task-learning-review) | 任务完成后直接维护经验，自动新增、更新、合并或删除项目文档、memory 或 skill |
 | [search-jay-llm-wiki](#search-jay-llm-wiki) | 在相关非平凡任务前主动检索 jay-llm-wiki 中的既有研究与工程经验 |
 | [show-dont-tell](#show-dont-tell) | 信息可视化呈现，让 GPT 优先用表格、代码块、列表呈现结构化信息 |
+| [split-ui-components](#split-ui-components) | 分析、实施和评审跨框架前端组件边界与拆分方案 |
 | [sync-skill-to-jay](#sync-skill-to-jay) | 创建或更新 skill 后，询问是否同步到 jay-skills 仓库并发布 |
 | [update-claude-code](#update-claude-code) | 更新 Claude Code CLI 到最新版本 |
 | [web-content-fetcher](#web-content-fetcher) | 网页内容获取技巧集合，覆盖 Markdown 提取、付费墙绕过等场景 |
@@ -263,6 +264,19 @@ codex plugin add langchain-skills@jay-skills
 | 数据结构 | string / list / hash / set / zset | 仅 key-value |
 | 持久化 | 支持（RDB / AOF） | 不支持 |
 | 线程模型 | 单线程（6.0 起 IO 多线程） | 多线程 |
+
+---
+
+## split-ui-components
+
+**描述：** Analyze, plan, implement, and review frontend UI component boundaries across component-based frameworks, with React-specific guidance. Use when Codex is asked to split or refactor components, review oversized or over-abstracted UI, decide state ownership, extract Hooks or Composables, design component APIs, preserve behavior during UI refactors, or handle requests about 组件拆分、组件边界、前端重构、过大组件或过度抽象.
+
+**触发场景：**
+
+- 分析、实施或评审前端组件拆分和组件边界
+- 处理过大组件、过度抽象或错误的通用组件
+- 判断状态所有权以及是否提取 Hook、Composable 或业务组件
+- 设计组件 API，并在 UI 重构中保持 DOM、状态和交互行为
 
 ---
 
