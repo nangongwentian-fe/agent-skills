@@ -54,6 +54,7 @@ codex plugin add langchain-skills@jay-skills
 | [figma-use](#figma-use) | Figma Plugin API 操作的前置必读 skill，必须在调用 use_figma 前加载 |
 | [git-topic-commit-push](#git-topic-commit-push) | 按主题拆分 Git 改动，默认使用中文 commit message 创建一个或多个 commit 并推送当前分支 |
 | [llm-wiki](#llm-wiki) | 查询和操作本地 LLM Wiki，支持 API、MCP 与固定项目文件回退 |
+| [maintainable-frontend-styles](#maintainable-frontend-styles) | 为 React、Next.js 和 Vite 实现、评审与重构可维护的前端样式 |
 | [progressive-disclosure-docs](#progressive-disclosure-docs) | 用渐进式披露设计、拆分和维护文档，避免 README 或单个文档无限膨胀 |
 | [post-implementation-review-gate](#post-implementation-review-gate) | 非平凡实现交付前执行风险分级、独立审查、发现复核与残余风险报告 |
 | [post-task-learning-review](#post-task-learning-review) | 任务完成后直接维护经验，自动新增、更新、合并或删除项目文档、memory 或 skill |
@@ -177,6 +178,20 @@ codex plugin add langchain-skills@jay-skills
 - 查询 Review、图谱、Wiki Agent Chat 或重扫来源
 - `$search-jay-llm-wiki` 请求任务前知识检索
 - 已授权的 Wiki 文件维护
+
+---
+
+## maintainable-frontend-styles
+
+**描述：** 为 React、Next.js 和 Vite 应用实现、评审和重构可维护的前端样式，指导 Tailwind CSS、CSS/SCSS Modules、全局 CSS 与 inline style 的选型、复用、拆分和验证。
+
+**触发场景：**
+
+- 实现、评审或重构 React、Next.js、Vite 的前端样式
+- 在 Tailwind CSS、CSS Modules、SCSS Modules、全局 CSS 和 inline style 之间选型
+- 设计组件样式变体或可复用的样式组合
+- 拆分过大的 `.module.scss` 文件或清理组件级全局 CSS
+- 评审 specificity、响应式、主题和无障碍样式
 
 ---
 
