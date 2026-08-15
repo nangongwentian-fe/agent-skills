@@ -7,7 +7,6 @@
 | 模块 | 目录 | 用途 |
 |------|------|------|
 | Skills | [`skills/`](./skills/) | 可通过 `npx skills add` 安装，由 Agent 按场景触发 |
-| Plugins | [`plugins/`](./plugins/) | 可通过 Codex 插件市场安装，打包一组相关 skills |
 | Playbooks | [`playbooks/`](./playbooks/) | 给 Agent 读取并按步骤执行的专题教程，不是可安装 skill |
 
 ## 安装
@@ -22,27 +21,6 @@ npx skills add https://github.com/nangongwentian-fe/jay-skills -g -y -a claude-c
 npx skills add https://github.com/nangongwentian-fe/jay-skills --skill <skill-name> -g -y -a claude-code codex
 ```
 
-## Codex 插件
-
-| Plugin | 来源 | 内容 |
-|--------|------|------|
-| [taste-skill](./plugins/taste-skill/) | [Leonxlnx/taste-skill](https://github.com/Leonxlnx/taste-skill) | 前端设计、改版、image-to-code、视觉风格和图片生成 skills |
-| [code-honor-skill](./plugins/code-honor-skill/) | [xxxily/code-honor-skill](https://github.com/xxxily/code-honor-skill) | 程序员八荣八耻编码准则、Code Review 模板和代码扫描工具 |
-| [andrej-karpathy-skills](./plugins/andrej-karpathy-skills/) | [multica-ai/andrej-karpathy-skills](https://github.com/multica-ai/andrej-karpathy-skills) | 思考优先、保持简单、精准修改和目标驱动验证的编码准则 |
-| [emilkowalski-skills](./plugins/emilkowalski-skills/) | [emilkowalski/skills](https://github.com/emilkowalski/skills) | 动画审查、动画改进、动效机会识别和设计工程准则 |
-| [langchain-skills](./plugins/langchain-skills/) | [langchain-ai/langchain-skills](https://github.com/langchain-ai/langchain-skills) | LangChain、LangGraph、Deep Agents、RAG 和 Agent 编排 skills |
-
-```bash
-codex plugin marketplace add nangongwentian-fe/jay-skills --ref main
-codex plugin add taste-skill@jay-skills
-codex plugin add code-honor-skill@jay-skills
-codex plugin add andrej-karpathy-skills@jay-skills
-codex plugin add emilkowalski-skills@jay-skills
-codex plugin add langchain-skills@jay-skills
-```
-
-五个外部插件每周检查一次上游更新，发现变化后分别创建 PR。手动检查、同步和验证命令见 [`docs/upstream-sync.md`](./docs/upstream-sync.md)。
-
 ## Skills 列表
 
 | Skill | 描述 |
@@ -51,18 +29,14 @@ codex plugin add langchain-skills@jay-skills
 | [clean-wechat-wps-storage](#clean-wechat-wps-storage) | 清理 macOS 微信和 WPS 本机占用，先扫描、确认计划，再移到废纸篓 |
 | [codex-imagegen](#codex-imagegen) | 通过 Codex CLI 的 image_gen 工具在 Claude Code 中生成 AI 图片 |
 | [daily-work-summary](#daily-work-summary) | 按指定项目和日期从 Git 提交记录生成中文工作内容总结 |
-| [figma-use](#figma-use) | Figma Plugin API 操作的前置必读 skill，必须在调用 use_figma 前加载 |
 | [git-topic-commit-push](#git-topic-commit-push) | 按主题拆分 Git 改动，默认使用中文 commit message 创建一个或多个 commit 并推送当前分支 |
-| [llm-wiki](#llm-wiki) | 查询和操作本地 LLM Wiki，支持 API、MCP 与固定项目文件回退 |
 | [maintainable-frontend-styles](#maintainable-frontend-styles) | 为 React、Next.js 和 Vite 实现、评审与重构可维护的前端样式 |
 | [progressive-disclosure-docs](#progressive-disclosure-docs) | 用渐进式披露设计、拆分和维护文档，避免 README 或单个文档无限膨胀 |
 | [post-implementation-review-gate](#post-implementation-review-gate) | 非平凡实现交付前执行风险分级、独立审查、发现复核与残余风险报告 |
 | [post-task-learning-review](#post-task-learning-review) | 任务完成后直接维护经验，自动新增、更新、合并或删除项目文档、memory 或 skill |
-| [search-jay-llm-wiki](#search-jay-llm-wiki) | 在相关非平凡任务前主动检索 jay-llm-wiki 中的既有研究与工程经验 |
 | [show-dont-tell](#show-dont-tell) | 信息可视化呈现，让 GPT 优先用表格、代码块、列表呈现结构化信息 |
 | [split-ui-components](#split-ui-components) | 分析、实施和评审跨框架前端组件边界与拆分方案 |
 | [sync-skill-to-jay](#sync-skill-to-jay) | 创建或更新 skill 后，询问是否同步到 jay-skills 仓库并发布 |
-| [update-claude-code](#update-claude-code) | 更新 Claude Code CLI 到最新版本 |
 | [web-content-fetcher](#web-content-fetcher) | 网页内容获取技巧集合，覆盖 Markdown 提取、付费墙绕过等场景 |
 
 ## Playbooks 列表
@@ -139,22 +113,6 @@ codex plugin add langchain-skills@jay-skills
 
 ---
 
-## figma-use
-
-**描述：** MANDATORY prerequisite — you MUST invoke this skill BEFORE every `use_figma` tool call. NEVER call `use_figma` directly without loading this skill first. Skipping it causes common, hard-to-debug failures. Trigger whenever the user wants to perform a write action or a unique read action that requires JavaScript execution in the Figma file context — e.g. create/edit/delete nodes, set up variables or tokens, build components and variants, modify auto-layout or fills, bind variables to properties, or inspect file structure programmatically.
-
-**触发场景：**
-
-- 每次调用 `use_figma` 前必须先加载此 skill
-- 在 Figma 文件中创建/编辑/删除节点
-- 设置变量或 Token
-- 构建组件和变体
-- 修改 auto-layout 或填充
-- 将变量绑定到属性
-- 以编程方式检查文件结构
-
----
-
 ## git-topic-commit-push
 
 **描述：** Create one or more Git commits grouped by coherent change topic, then push the current branch. Use when the user asks to commit and push, submit by topic, split current changes into topical commits, or do "按照主题提交 commit 并 push"; especially when a worktree has mixed staged, unstaged, or untracked changes that need honest commit boundaries before `git push`. Commit messages must be written in Chinese unless the user explicitly requests another language.
@@ -165,19 +123,6 @@ codex plugin add langchain-skills@jay-skills
 - 用户要求按照主题提交、分主题提交或拆分当前改动
 - 工作区同时存在 staged、unstaged 或 untracked 改动，需要先判断 commit 边界
 - 需要创建一个或多个诚实概括改动范围的 commit 后推送当前分支
-
----
-
-## llm-wiki
-
-**描述：** Operate the user's locally running LLM Wiki desktop app and its project files. Use when the user explicitly names LLM Wiki, my wiki, 知识库, a Wiki page/project, graph, review queue, Wiki Agent chat, or source rescan; also use when another skill such as search-jay-llm-wiki requests LLM Wiki retrieval or authorized filesystem maintenance. Covers LLM Wiki 0.6.4 health, projects, file listing/read, reviews, hybrid search, Agent chat and cancellation, graph navigation, source rescan, and the fixed jay-llm-wiki filesystem fallback. Do not trigger for Obsidian, Notion, generic notes, or unrelated knowledge tools.
-
-**触发场景：**
-
-- 用户明确提到 LLM Wiki、知识库、Wiki 页面或项目
-- 查询 Review、图谱、Wiki Agent Chat 或重扫来源
-- `$search-jay-llm-wiki` 请求任务前知识检索
-- 已授权的 Wiki 文件维护
 
 ---
 
@@ -241,18 +186,6 @@ codex plugin add langchain-skills@jay-skills
 
 ---
 
-## search-jay-llm-wiki
-
-**描述：** Proactively search the fixed jay-llm-wiki before relevant non-trivial research, architecture, technology selection, complex debugging, or complex implementation tasks when prior Deep Research or reusable engineering knowledge may help. Use even when the user does not explicitly mention LLM Wiki. Invoke `$llm-wiki` for transport, cite the Wiki paths used, and verify time-sensitive claims with current first-party sources. Skip translation, formatting, simple calculations, one-line commands, casual conversation, and clearly unrelated self-contained tasks.
-
-**触发场景：**
-
-- 研究、架构设计、技术选型、复杂调试或复杂开发
-- 可能复用既有 Deep Research、跨项目结论或工程经验的非平凡任务
-- 用户未明确提到 Wiki，但既有知识可能影响任务方法
-
----
-
 ## show-dont-tell
 
 **描述：** 信息可视化呈现行为准则。让 GPT 在回复中优先使用表格、代码块、编号列表、树形结构等格式呈现结构化信息，而不是纯文字堆砌。
@@ -303,19 +236,6 @@ codex plugin add langchain-skills@jay-skills
 
 - SKILL.md 刚刚创建或修改时自动触发
 - 询问用户是否同步到 jay-skills 仓库并发布到远程
-
----
-
-## update-claude-code
-
-**描述：** 更新 Claude Code CLI 到最新版本。当用户说"更新 Claude Code"、"升级 Claude Code"、"update claude code"、"claude code 太旧了"、"执行 install.sh 更新"，或者想让 Claude 自我更新时，立即使用此 skill。不要等用户明确说"用 npm"——只要涉及更新 Claude Code 本身，就使用这个 skill。
-
-**触发场景：**
-
-- 更新 Claude Code CLI 到最新版本
-- 用户说"更新 Claude Code"、"升级 Claude Code"
-- 用户说"update claude code"、"claude code 太旧了"
-- 用户想让 Claude 自我更新
 
 ---
 
