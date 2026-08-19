@@ -15,10 +15,10 @@
 
 ```bash
 # 安装全部 skills
-npx skills add https://github.com/nangongwentian-fe/jay-skills -g -y -a claude-code codex
+npx skills add nangongwentian-fe/jay-skills --global
 
 # 安装单个 skill
-npx skills add https://github.com/nangongwentian-fe/jay-skills --skill <skill-name> -g -y -a claude-code codex
+npx skills add nangongwentian-fe/jay-skills --skill <skill-name> --global
 ```
 
 ## Skills 列表
@@ -36,7 +36,7 @@ npx skills add https://github.com/nangongwentian-fe/jay-skills --skill <skill-na
 | [post-task-learning-review](#post-task-learning-review) | 任务完成后直接维护经验，自动新增、更新、合并或删除项目文档、memory 或 skill |
 | [show-dont-tell](#show-dont-tell) | 信息可视化呈现，让 GPT 优先用表格、代码块、列表呈现结构化信息 |
 | [split-ui-components](#split-ui-components) | 分析、实施和评审跨框架前端组件边界与拆分方案 |
-| [sync-skill-to-jay](#sync-skill-to-jay) | 创建或更新 skill 后，询问是否同步到 jay-skills 仓库并发布 |
+| [sync-skill-to-jay](#sync-skill-to-jay) | 以 jay-skills 为权威源验证、发布并重新安装新建或更新的 Skill |
 | [web-content-fetcher](#web-content-fetcher) | 网页内容获取技巧集合，覆盖 Markdown 提取、付费墙绕过等场景 |
 
 ## Playbooks 列表
@@ -230,12 +230,13 @@ npx skills add https://github.com/nangongwentian-fe/jay-skills --skill <skill-na
 
 ## sync-skill-to-jay
 
-**描述：** Post-action workflow that triggers automatically after creating a new skill or updating an existing skill. Ask the user whether to sync the skill to the jay-skills repository and publish to remote. Use whenever a SKILL.md has just been created or modified.
+**描述：** 新建或更新 Agent Skill 后，以 jay-skills 仓库为唯一权威源完成验证、文档同步、commit、push，并将已发布版本重新安装到全局 canonical skills 目录。
 
 **触发场景：**
 
-- SKILL.md 刚刚创建或修改时自动触发
-- 询问用户是否同步到 jay-skills 仓库并发布到远程
+- Skill 已在 jay-skills 中新建或更新，需要验证、发布并重新安装
+- 外部新 Skill 需要一次性导入 jay-skills，且仓库中尚无同名目标
+- 用户要求把 Skill 同步到远端并安装到 `~/.agents/skills`
 
 ---
 

@@ -1,190 +1,89 @@
 ---
 name: sync-skill-to-jay
-description: "Post-action workflow that triggers automatically after creating a new skill or updating an existing skill. Ask the user whether to sync the skill to the jay-skills repository and publish to remote. Use whenever a SKILL.md has just been created or modified."
+description: Publish a newly created or updated Agent Skill through the jay-skills repository, then reinstall the published version into the canonical global skills directory. Use after a Skill change when the user wants to validate, document, commit, push, and install it. Do not publish private or local-only Skills without explicit approval.
 ---
 
 # Sync Skill to Jay
 
-After creating or updating a skill, ask the user:
+Treat `jay-skills/skills/<skill-name>` as the sole publishable source of truth. `~/.agents/skills/<skill-name>` is an installation artifact managed by `npx skills add`, not a source to copy back over the repository.
 
-> 是否需要将此 skill 同步到 jay-skills 并发布到远程？
+## Authorization boundary
 
-If yes, execute the following workflow.
+After a Skill is created or updated, ask once whether the user wants to synchronize, publish, and reinstall it. The confirmation must identify the repository, Skill name, publish branch, Git push, and global installation. One affirmative answer authorizes the complete workflow below, including the bounded one-time SSH fallback described under "Commit and push". Ask again only when a conflict, unexpected dirty worktree, identity mismatch, new credentials, validation failure, or scope expansion requires a new decision.
 
-## Workflow
+Do not infer permission to publish another Skill, rewrite Git history, force-push, alter remotes, or expose a private Skill.
 
-### 1. Locate or clone jay-skills repo
+## Source resolution
 
-If the user already provided a `jay-skills` path, use it after verifying the
-directory and Git remote. Otherwise search common local paths.
+1. Locate the local `jay-skills` checkout and verify that its remote represents `nangongwentian-fe/jay-skills`.
+2. Resolve the exact target as `skills/<skill-name>` and prove it stays inside the repository's `skills/` directory.
+3. For an existing Skill, edit and validate the repository target directly.
+4. For a new Skill created elsewhere, import its complete directory only when the repository target does not yet exist.
+5. If an external or installed copy differs from an existing repository target, never copy it over the target. Show the relevant diff and port only the intended changes into the repository source.
 
-macOS / Linux:
+Never move, delete, or rewrite an explicit project source or an installed copy merely because publication succeeds.
 
-```bash
-find ~ -maxdepth 5 -type d -name "jay-skills" 2>/dev/null | head -1
-```
+## Repository update
 
-Windows PowerShell:
+Before editing, inspect `git status --short --branch`, the current branch, recent commits, remotes, and the remote default branch. Because the install command reads that default branch, the authorized publish branch must be the remote default branch (`main` for `nangongwentian-fe/jay-skills`), and the current branch and upstream must match it. Stop before committing and obtain explicit switch or merge direction when they do not. Preserve unrelated changes and stop if they overlap the target or prevent an honest commit boundary.
 
-```powershell
-Get-ChildItem -Path $env:USERPROFILE -Directory -Filter jay-skills -Recurse -ErrorAction SilentlyContinue |
-  Select-Object -First 1
-```
+Update only artifacts owned by the changed Skill:
 
-- If found → use that path as `JAY_SKILLS_DIR`
-- If not found → **ask the user**: "本地未找到 jay-skills 仓库，请提供你希望克隆到的目录路径（例如 ~/Documents/Projects）"
-  Then clone into the user-provided path:
-  ```bash
-  git clone https://github.com/nangongwentian-fe/jay-skills.git <user-provided-path>/jay-skills
-  ```
+- the complete `skills/<skill-name>` directory;
+- its existing targeted documentation or evals;
+- the corresponding root README table row and detail section when the Skill description or usage changed;
+- shared installation examples only when the CLI contract changed.
 
-### 2. Sync skill files
+Do not regenerate the whole README or rewrite unrelated Skill descriptions.
 
-Resolve the source in this order:
+## Validation
 
-1. An explicit skill path supplied by the user
-2. `~/.agents/skills/<skill-name>` (universal/Codex installation)
-3. `~/.claude/skills/<skill-name>` (Claude Code installation or link)
+Run the active Skill Creator's `scripts/quick_validate.py` against the repository Skill. Validate any changed JSON, scripts, or other resources with their native parser or focused check. Then run `git diff --check` and inspect the complete target diff for secrets, generated artifacts, accidental deletions, and unrelated files.
 
-Keep these roles separate:
+For a substantial workflow change, add or update realistic eval cases. Evals should exercise decisions and observable outcomes rather than merely matching headings or fixed wording.
 
-- `SOURCE_SKILL_PATH`: the authoritative content to publish. An explicit
-  project/repository source is never moved. A discovered user-install source
-  may later be replaced only after the repository target is fully validated.
-- `TARGET_REPO_SKILL_PATH`: the exact `$JAY_SKILLS_DIR/skills/<skill-name>`
-  destination.
-- `CURRENT_INSTALL_PATHS`: existing `.agents` and `.claude` installation
-  entries that form the current topology and may later be replaced.
+Do not publish until every required validation passes.
 
-Verify that the source contains `SKILL.md` and that the target remains inside
-`$JAY_SKILLS_DIR/skills/`. If source and target resolve to the same path, skip
-the copy.
+## Commit and push
 
-Never copy the source directory onto an existing target directory: both
-`cp -R SOURCE TARGET` and `Copy-Item SOURCE TARGET -Recurse` can create a
-nested `<skill-name>/<skill-name>` directory. Instead:
+Create one coherent commit when all changes serve the same Skill outcome; otherwise split them by honest topic. Stage only the reviewed files.
 
-1. Copy the source contents into a uniquely named staging directory.
-2. Validate the staged `SKILL.md` and complete file set.
-3. Move an existing exact target to a temporary backup.
-4. Move staging to the exact target.
-5. On failure, restore the target backup.
-6. After success, move the target backup to Trash/Recycle Bin.
+- Use Conventional Commit types such as `feat`, `fix`, `docs`, or `chore`.
+- Write the subject and 2–5 outcome-focused body bullets in Chinese unless the user requests another language.
+- Do not add a model-specific `Co-Authored-By` trailer unless the user explicitly asks for it.
+- Do not amend, rebase, force-push, or switch branches unless separately authorized.
 
-Works for both new and existing skills.
-See [references/platform-commands.md](references/platform-commands.md) for the
-cross-platform state machine and safe command primitives.
+Push the authorized remote default branch through its configured upstream, then verify that the configured remote-tracking branch (normally `origin/main`) points exactly to the new commit. If an HTTPS push fails only because credentials are unavailable, the initial workflow approval also authorizes this bounded fallback: verify an existing GitHub SSH identity, push once through the equivalent SSH URL without changing `origin`, then fetch the configured remote to refresh its tracking reference. Stop and ask again on identity mismatch, when new credentials or a remote change would be required, or on any non-authentication failure.
 
-### 3. Update jay-skills README
+## Install the published Skill
 
-After syncing the skill files, regenerate `$JAY_SKILLS_DIR/README.md` to reflect the current state of all skills in the repo.
-
-**How to build the README:**
-
-1. Scan all skill directories under `$JAY_SKILLS_DIR/skills/`
-2. For each skill, read its `SKILL.md` and extract:
-   - `name` (from frontmatter)
-   - `description` (from frontmatter)
-   - Any `## Examples` or `## 示例` section content (if present) — use as the "效果示例"
-3. Generate a README with the following structure:
-
-```markdown
-# Jay Skills
-
-> Jay 的 AI Agent Skills 集合，适用于 Claude Code / Codex 等 AI 编程工具。
-
-## 安装
-
-\`\`\`bash
-npx skills add https://github.com/nangongwentian-fe/jay-skills -g -y -a claude-code codex
-\`\`\`
-
-## Skills 列表
-
-| Skill | 描述 |
-|-------|------|
-| [skill-name](#skill-name) | one-line description |
-...
-
----
-
-## skill-name
-
-**描述：** ...
-
-**触发场景：** （从 description 中提取触发条件，以要点形式列出）
-
-**效果示例：**
-
-（如果 SKILL.md 中有 Examples / 示例 section，粘贴内容；否则省略此小节）
-
----
-（重复以上结构，每个 skill 一节）
-```
-
-**Rules:**
-- Keep descriptions concise — one sentence max in the table; full description in the detail section
-- If a skill's `SKILL.md` has no Examples section, omit "效果示例" for that skill
-- Preserve existing README content that is not auto-generated (e.g., top-level intro) if it already exists — only regenerate the skills table and detail sections
-- Write the final README in Chinese where natural; keep code/skill names in English
-
-### 5. Commit and push
-
-From `$JAY_SKILLS_DIR`:
-
-Stage both the skill files and the updated README:
-```bash
-git add skills/<skill-name> README.md
-```
-
-- New skill: `feat: add <skill-name> skill`
-- Updated skill: `improve: <brief description of what changed> in <skill-name>`
-- Always append `Co-Authored-By: Claude Sonnet 4.6 (1M context) <noreply@anthropic.com>`
-
-Push to `origin main`.
-
-### 6. Remove local skill and reinstall via npx
-
-Replace the bare local installation through a recoverable swap:
-
-1. Resolve `CURRENT_INSTALL_PATHS` separately from `SOURCE_SKILL_PATH`:
-   - inventory both `~/.agents/skills/<skill-name>` and
-     `~/.claude/skills/<skill-name>` before moving either one;
-   - preserve whether each entry is a real directory or link/junction;
-   - never treat an explicit project or repository source as disposable;
-   - if the discovered source is itself a user installation, first validate
-     the synchronized repository target, then handle that installation through
-     the recoverable replacement transaction.
-2. Move only the verified current installation entries to separate uniquely
-   named temporary backups outside the managed skill paths. Move agent-specific
-   links before their managed target so they do not become broken mid-check.
-3. Run the install command below.
-4. Verify the new managed `.agents` `SKILL.md`, full file set/content against
-   `TARGET_REPO_SKILL_PATH`, and Claude Code/Codex link topology.
-5. Treat installation and all verification as one transaction. If any step
-   fails, move partial new installations aside and restore every backup to its
-   original exact path and topology.
-6. After success, move regular-directory backups to Trash/Recycle Bin. Remove
-   link/junction backups only with a verified link-only operation; otherwise
-   retain the inactive backup and report its exact path.
+Only after the remote commit is verified, reinstall the selected Skill non-interactively under the authorization already granted:
 
 ```bash
-npx skills add https://github.com/nangongwentian-fe/jay-skills --skill <skill-name> -g -y -a claude-code codex
+npx skills add nangongwentian-fe/jay-skills \
+  --skill <skill-name> \
+  --global \
+  --yes
 ```
 
-- `--skill <skill-name>` — only installs this specific skill, not all skills in the repo
-- `-g` — installs globally (user-level, into `~/.agents/skills/` with symlinks)
-- `-y` — non-interactive, no prompts
-- `-a claude-code codex` — only installs to Claude Code and Codex agents
+Do not pass `--agent`. The canonical success target is:
 
-This replaces the manually created skill with the properly installed version (symlinks and other optimizations from the skills framework).
-See [references/platform-commands.md](references/platform-commands.md) for
-recoverable macOS/Linux and Windows command examples.
+```text
+~/.agents/skills/<skill-name>
+```
 
-## Notes
+Codex can discover this canonical directory directly. Do not require or create `~/.codex/skills` or `~/.claude/skills` links as part of this workflow.
 
-- Only sync skills the user explicitly wants published (some may be private)
-- Subdirectories (`scripts/`, `references/`, `assets/`) are included automatically via `cp -r`
-- The `npx skills add` step ensures the installed skill is managed by the skills framework, not a bare copy
-- Treat line-ending-only differences (`CRLF` versus `LF`) as equivalent when
-  comparing a Windows Git worktree with the installed GitHub copy.
+Verify the installed `SKILL.md`, complete file set, and file contents against the pushed repository version. Ignore line-ending-only differences. Do not trust the installer exit code alone: an unsupported unrelated adapter such as PromptScript is a warning when the canonical directory is complete and matches; a missing or mismatched canonical installation is a failure even if the command exits successfully.
+
+If publication succeeds but installation or verification fails, keep the published commit, report the exact installation state, and stop. Do not roll back or rewrite remote history.
+
+## Completion report
+
+Report:
+
+- changed Skill and documentation paths;
+- validation and eval results;
+- commit hash, subject, branch, and push result;
+- canonical installation path and content-verification result;
+- remaining warnings, conflicts, or unrelated worktree changes.

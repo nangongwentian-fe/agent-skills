@@ -7,7 +7,7 @@
 ### 1. 安装 skill 文件
 
 ```bash
-npx skills add https://github.com/nangongwentian-fe/jay-skills --skill show-dont-tell -g -y -a claude-code codex
+npx skills add nangongwentian-fe/jay-skills --skill show-dont-tell --global
 ```
 
 ### 2. 执行 install.sh（关键步骤，不可跳过）
