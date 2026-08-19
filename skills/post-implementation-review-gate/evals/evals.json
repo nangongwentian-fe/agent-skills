@@ -128,6 +128,18 @@
         "The stale review does not pass the changed implementation.",
         "The new delta is reviewed or explicitly remains blocking."
       ]
+    },
+    {
+      "id": 11,
+      "prompt": "A review-triggering implementation is complete. The active orchestration rule says: ‘Do not spawn sub-agents unless the user or applicable AGENTS.md/skill instructions explicitly ask for sub-agents, delegation, or parallel agent work.’ No user instruction otherwise forbids delegation. Complete the post-implementation review gate.",
+      "expected_output": "The agent recognizes that this skill explicitly requires one isolated read-only reviewer, treats the skill exception as authorization for that reviewer, and does not incorrectly fall back to a local review or claim that delegation is forbidden.",
+      "files": [],
+      "expectations": [
+        "The complete orchestration rule is evaluated together with its skill exception.",
+        "This skill's independent-reviewer step is treated as an explicit applicable skill request.",
+        "Exactly one new isolated read-only reviewer is spawned for the gate.",
+        "The final handoff does not claim that delegation was forbidden by the quoted rule."
+      ]
     }
   ]
 }

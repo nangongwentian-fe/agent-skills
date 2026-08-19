@@ -1,7 +1,6 @@
 ---
 name: post-implementation-review-gate
 description: Use after completing a non-trivial implementation and before final handoff, especially for public API/schema compatibility, database or migration work, authentication/security, deployment/configuration, concurrency or data integrity, algorithmic or control-flow complexity, cross-module refactors, runtime lifecycle, and rendered UI behavior. Make sure to invoke this skill even when the user asks only to implement or fix something and does not explicitly request review. Risk-classify the completed change, use a new isolated read-only subagent for review-triggering changes when delegation is allowed, otherwise perform and disclose a local fallback, verify findings, fix authorized in-scope defects, rerun relevant checks, and report residual risks. Do not use for planning, answer-only or diagnosis-only tasks, trivial text edits, mechanical formatting, or tasks with no implementation-artifact change.
-compatibility: Uses collaboration subagent tools when available; otherwise requires read access to the changed codebase for a disclosed local fallback.
 ---
 
 # Post-Implementation Review Gate
@@ -16,6 +15,19 @@ Do not declare a review-triggering implementation complete until one of these ou
 - independent review was unavailable because delegation was forbidden or remained unavailable after one bounded retry, and the final answer identifies the local fallback performed.
 
 The gate does not broaden authorization. Keep production changes, external writes, destructive actions, secrets, and unrelated work outside the scope originally granted by the user.
+
+## Delegation permission preflight
+
+Before declaring delegation forbidden, read the complete active orchestration rule, including every exception. A rule such as “do not spawn subagents unless the user, an applicable `AGENTS.md`, or an applicable skill explicitly asks” permits the one isolated, read-only reviewer required by this skill: step 5 below is the applicable skill's explicit request.
+
+This permission is narrow. It authorizes only the independent reviewer needed for this gate and does not authorize implementation delegation, extra reviewers, writes, external side effects, or broader scope. An unconditional higher-priority prohibition still wins.
+
+Use a local fallback for delegation availability only after checking all of the following:
+
+1. Identify the exact active rule governing subagent use.
+2. Check whether it contains a user, `AGENTS.md`, or skill exception.
+3. If a skill exception exists, treat this skill's reviewer step as satisfying it.
+4. Claim delegation was forbidden only when the prohibition is unconditional or no stated exception applies. Tool absence or a failed bounded retry is unavailability, not prohibition.
 
 ## Select the gate level
 
@@ -42,7 +54,7 @@ If uncertain, use the independent reviewer. For a local-review outcome, record t
 ## Workflow
 
 1. Finish the implementation and its first proportional verification.
-2. Select the gate level using the criteria above. Stop after a documented local review when every low-risk condition is satisfied.
+2. Select the gate level using the criteria above and complete the delegation permission preflight. Stop after a documented local review when every low-risk condition is satisfied.
 3. Freeze the review scope before spawning the reviewer:
    - user objective and acceptance criteria;
    - repository and working directory;
@@ -117,7 +129,7 @@ Do not silently defer a verified in-scope defect that can be safely fixed under 
 
 - If spawning fails, retry once with a smaller self-contained scope.
 - If the reviewer times out, inspect its partial evidence, then retry once only when useful.
-- If the user forbids delegation, do not spawn or retry. Perform the bounded local fallback and disclose that independent review was unavailable by instruction.
+- If the user or a higher-priority instruction unconditionally forbids delegation and no stated exception applies, do not spawn or retry. Perform the bounded local fallback and disclose that independent review was unavailable by instruction.
 - If independent review remains unavailable, perform a local review and disclose that it was not independent.
 - If the reviewer requests user input, route the question through the primary agent.
 - If the review discovers a needed action outside current authority, stop that action and state the exact permission or decision required.
