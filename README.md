@@ -28,7 +28,7 @@ npx skills add nangongwentian-fe/jay-skills --skill <skill-name> --global
 | [buddy-reroll](#buddy-reroll) | 重新掷骰 Claude Code 伙伴，获取指定物种、稀有度或闪光变体 |
 | [clean-wechat-wps-storage](#clean-wechat-wps-storage) | 清理 macOS 微信和 WPS 本机占用，先扫描、确认计划，再移到废纸篓 |
 | [codex-imagegen](#codex-imagegen) | 通过 Codex CLI 的 image_gen 工具在 Claude Code 中生成 AI 图片 |
-| [daily-work-summary](#daily-work-summary) | 按指定项目和日期从 Git 提交记录生成中文工作内容总结 |
+| [daily-work-summary](#daily-work-summary) | 按指定项目和日期仅从本人 Git 提交生成中文工作内容总结 |
 | [git-topic-commit-push](#git-topic-commit-push) | 按主题拆分 Git 改动，默认使用中文 commit message 创建一个或多个 commit 并推送当前分支 |
 | [maintainable-frontend-styles](#maintainable-frontend-styles) | 为 React、Next.js 和 Vite 实现、评审与重构可维护的前端样式 |
 | [progressive-disclosure-docs](#progressive-disclosure-docs) | 用渐进式披露设计、拆分和维护文档，避免 README 或单个文档无限膨胀 |
@@ -96,12 +96,13 @@ npx skills add nangongwentian-fe/jay-skills --skill <skill-name> --global
 
 ## daily-work-summary
 
-**描述：** 根据指定 Git 仓库和日期，从 commit、提交正文、文件变更及必要的 diff 中提炼每日工作内容。用于用户要求按项目和日期生成日报、每日工作总结、根据 Git commit 总结工作，或要求用 1、2、3 编号列出某天或某段日期完成事项的场景。
+**描述：** 根据指定 Git 仓库和日期，仅从提交作者为用户本人的 commit、提交正文、文件变更及必要的 diff 中提炼每日工作内容。用于用户要求按项目和日期生成日报、每日工作总结、根据 Git commit 总结工作，或要求用 1、2、3 编号列出某天或某段日期完成事项的场景。
 
 **触发场景：**
 
 - 按指定项目和日期生成日报或每日工作总结
-- 根据 Git commit 汇总单日、多个日期或日期区间的完成事项
+- 根据 Git commit 汇总本人在单日、多个日期或日期区间的完成事项
+- 仓库包含多人提交时排除其他作者的工作内容
 - 用简洁的中文编号清单列出工作内容
 
 **效果示例：**
@@ -109,6 +110,7 @@ npx skills add nangongwentian-fe/jay-skills --skill <skill-name> --global
 - `总结 E:\Code\Project\Demo 2026-07-16 的工作内容。` → 输出当天的编号工作事项
 - `总结当前项目 7 月 16 日和 7 月 17 日的工作内容。` → 按日期分组并分别编号
 - `总结 D:\work\app 2026-07-01 至 2026-07-05 的每日工作。` → 覆盖区间内每个日期
+- 指定日期包含多人提交 → 只汇总本人作者身份匹配的提交
 - 指定日期没有提交 → 输出“该日期没有已提交工作内容。”
 
 ---
